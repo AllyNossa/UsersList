@@ -6,33 +6,48 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MvpView {
 
     RecyclerView recyclerView;
+    UserPresenter userPresenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        initPresenter();
+        initRecycler();
+    }
+
+    @Override
+    public void showUsers(List<User> users) {
+        recyclerView.setAdapter(new UsersAdapter(users));
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        userPresenter.attach(this);
+    }
+
+    @Override
+    protected void onStop() {
+        userPresenter.detach();
+        super.onStop();
+    }
+
+    private void initRecycler() {
         recyclerView = findViewById(R.id.recycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setHasFixedSize(true);
-
-        recyclerView.setAdapter(new UsersAdapter(getTempUsers()));
     }
 
-    private List<User> getTempUsers() {
-        List<User> users = new ArrayList<>();
-        users.add(new User(1, "Test1", "", ""));
-        users.add(new User(2, "Test2", "", ""));
-        users.add(new User(3, "Test3", "", ""));
-        users.add(new User(4, "Test4", "", ""));
-        users.add(new User(5, "Test5", "", ""));
-        users.add(new User(6, "Test6", "", ""));
-        return users;
+    private void initPresenter() {
+        if (userPresenter == null) {
+            userPresenter = new UserPresenter();
+        }
     }
 }
